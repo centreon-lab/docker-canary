@@ -24,6 +24,9 @@ if ! grep -q "/var/spool/centreon/.ssh/id_rsa" /proc/mounts; then
     exit 1;
 fi
 
+# With emulate MariaDB in localhost, we need force variable MYSQL_HOST to use the localhost as hostname
+MYSQL_HOST="localhost"
+
 MakeConf() {
     mv /tmp/conf.pm /etc/centreon/
     mv /tmp/centreon.conf.php /etc/centreon/

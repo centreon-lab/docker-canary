@@ -16,6 +16,7 @@ RUN yum install -y \
     git \
     unzip \
     cronie \
+    socat \
   && wget http://yum.centreon.com/standard/19.04/el7/stable/noarch/RPMS/${CENTREON_REPO_VERSION} -O /tmp/${CENTREON_REPO_VERSION} \
   && yum install --nogpgcheck -y /tmp/${CENTREON_REPO_VERSION} \
   && yum-config-manager -q --enable centreon-canary \
@@ -45,6 +46,8 @@ COPY files/supervisord/php-fpm.ini /etc/supervisor.d/
 COPY files/supervisord/apache-httpd.ini /etc/supervisor.d/
 COPY files/supervisord/postfix.ini /etc/supervisor.d/
 COPY files/supervisord/rsyslog.ini /etc/supervisor.d/
+COPY files/supervisord/socat-mariadb.ini /etc/supervisor.d/
+RUN sed -i "s/##MARIADB_SERVER##/${MYSQL_HOST}/" /etc/supervisor.d/socat-mariadb.ini
 
 # Add fake init scripts (used by centreon web)
 COPY files/init-fake/centengine /etc/init.d/centengine
