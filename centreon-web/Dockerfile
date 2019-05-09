@@ -22,8 +22,7 @@ RUN yum install -y \
   && yum-config-manager -q --enable centreon-canary \
   && yum-config-manager -q --enable centreon-canary-noarch \
   && yum install -y \
-    centreon-base-config-centreon-engine \
-    centreon-plugin-Operatingsystems-Linux-Snmp \
+    centreon \
   && wget -O - https://bootstrap.pypa.io/get-pip.py | python - \
   && pip install supervisor requests \
   && echo_supervisord_conf > /etc/supervisord.conf \
@@ -47,7 +46,6 @@ COPY files/supervisord/apache-httpd.ini /etc/supervisor.d/
 COPY files/supervisord/postfix.ini /etc/supervisor.d/
 COPY files/supervisord/rsyslog.ini /etc/supervisor.d/
 COPY files/supervisord/socat-mariadb.ini /etc/supervisor.d/
-RUN sed -i "s/##MARIADB_SERVER##/${MYSQL_HOST}/" /etc/supervisor.d/socat-mariadb.ini
 
 # Add fake init scripts (used by centreon web)
 COPY files/init-fake/centengine /etc/init.d/centengine

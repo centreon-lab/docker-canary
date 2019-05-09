@@ -25,7 +25,12 @@ if ! grep -q "/var/spool/centreon/.ssh/id_rsa" /proc/mounts; then
 fi
 
 # With emulate MariaDB in localhost, we need force variable MYSQL_HOST to use the localhost as hostname
+sed -i "s/##MARIADB_SERVER##/${MYSQL_HOST}/" /etc/supervisor.d/socat-mariadb.ini
 MYSQL_HOST="localhost"
+
+echo "Starting redirect mariadb ..."
+$(sed -n '/command=/p' /etc/supervisor.d/socat-mariadb.ini | sed 's/command=//') &2> /dev/null
+PID_SOCAT=$!
 
 MakeConf() {
     mv /tmp/conf.pm /etc/centreon/
@@ -55,6 +60,7 @@ testMySQL() {
 }
 
 InstallDbCentreon() {
+
     echo "Starting Apache to apply configuration ..."
     /opt/rh/httpd24/root/usr/sbin/httpd-scl-wrapper -DFOREGROUND &2> /dev/null
     PID_HTTPD=$!
@@ -97,7 +103,7 @@ InstallDbCentreon() {
     ${CURL_CMD} "${CENTREON_HOST}/centreon/install/steps/process/process_step9.php" \
         --data "send_statistics=1"
 
-    echo "Kill Apache and PHP-FPM ..."
+    echo "Kill Apache, PHP-FPM ..."
     kill $PID_HTTPD
     kill $PID_PHPFPM
     echo "imprimir conf.pm: "
@@ -289,6 +295,7 @@ if ! grep "StrictHostKeyChecking no" /etc/ssh/ssh_config; then
     echo "\tStrictHostKeyChecking no" >> /etc/ssh/ssh_config
 fi
 
+kill $PID_SOCAT
 echo "Centreon Web ready !"
 
 if [ -d "/usr/share/centreon/www/install" ]; then
