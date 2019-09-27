@@ -42,8 +42,8 @@ MakeConf() {
 
 testMySQL() {
     sleep 15
-    if /opt/rh/rh-php71/root/usr/bin/php -r 'try { $db = new PDO("mysql:host=".getenv("MYSQL_HOST"), "root", getenv("MYSQL_ROOT_PASSWORD")); exit(0); } catch (Exception $e) { exit(1); }'; then
-        /opt/rh/rh-php71/root/usr/bin/php -r 'try { $db = new PDO("mysql:dbname=centreon;host=".getenv("MYSQL_HOST"), "root", getenv("MYSQL_ROOT_PASSWORD")); exit(0); } catch (Exception $e) { exit(1); }'
+    if /opt/rh/rh-php72/root/usr/bin/php -r 'try { $db = new PDO("mysql:host=".getenv("MYSQL_HOST"), "root", getenv("MYSQL_ROOT_PASSWORD")); exit(0); } catch (Exception $e) { exit(1); }'; then
+        /opt/rh/rh-php72/root/usr/bin/php -r 'try { $db = new PDO("mysql:dbname=centreon;host=".getenv("MYSQL_HOST"), "root", getenv("MYSQL_ROOT_PASSWORD")); exit(0); } catch (Exception $e) { exit(1); }'
         echo $?
     else
         echo "You need a valid connection to your MySQL server !"
@@ -56,7 +56,7 @@ InstallDbCentreon() {
     /opt/rh/httpd24/root/usr/sbin/httpd-scl-wrapper -DFOREGROUND &2> /dev/null
     PID_HTTPD=$!
     echo "Starting PHP-FPM to apply configuration ..."
-    /opt/rh/rh-php71/root/usr/sbin/php-fpm -F &2> /dev/null
+    /opt/rh/rh-php72/root/usr/sbin/php-fpm -F &2> /dev/null
     PID_PHPFPM=$!
 
     sleep 5 # waiting start httpd process
@@ -104,53 +104,11 @@ InstallDbCentreon() {
 
 installModules() {
 
-    # After Centreon configuration, install modules
-    if [ ! "$(rpm -aq | grep centreon-map-release)" ]; then
-        MYSQL_HOST_CLIENT=$( \
-            echo "SELECT host FROM information_schema.processlist WHERE ID=connection_id();" \
-            | mysql -u root --password="${MYSQL_ROOT_PASSWORD}" -h ${MYSQL_HOST} \
-            | sed 1d | cut -f1 -d":" \
-        )
-        echo "CREATE USER 'centreon_map'@'${MYSQL_HOST_CLIENT}' IDENTIFIED BY '${MYSQL_PASSWD}';" \
-            | mysql -u root --password="${MYSQL_ROOT_PASSWORD}" -h ${MYSQL_HOST}
-        echo "GRANT SELECT ON centreon_storage.* TO 'centreon_map'@'${MYSQL_HOST_CLIENT}';" \
-            | mysql -u root --password="${MYSQL_ROOT_PASSWORD}" -h ${MYSQL_HOST}
-        echo "GRANT SELECT, INSERT ON centreon.* TO 'centreon_map'@'${MYSQL_HOST_CLIENT}';" \
-            | mysql -u root --password="${MYSQL_ROOT_PASSWORD}" -h ${MYSQL_HOST}
-    
-        yum install -y http://yum.centreon.com/centreon-map/bfcfef6922ae08bd2b641324188d8a5f/19.04/el7/stable/noarch/RPMS/centreon-map-release-19.04-1.el7.centos.noarch.rpm \
-            && yum-config-manager -y -q --disable centreon-map-stable \
-            && yum-config-manager -y -q --enable centreon-map-canary-noarch \
-            && yum install -y centreon-map-server expect
-        cd /etc/centreon-studio
-        find /etc/centreon-studio -type f -name \*.sh | xargs chmod -v +x
-        export PATH="$PATH:/etc/centreon-studio"
-        sed -i \
-            -e "s/##CENTREON_ADMIN_PASSWORD##/${CENTREON_ADMIN_PASSWD}/g" \
-            -e "s/##CENTREON_HOST_DATABASE##/${MYSQL_HOST}/g" \
-            -e "s/##CENTREON_USER_DB_PASSWORD##/${MYSQL_PASSWD}/g" \
-            -e "s/##MYSQL_ROOT_PASSWORD##/${MYSQL_ROOT_PASSWORD}/g" \
-            /tmp/configure-map.exp
-        #/tmp/./configure-map.exp
-    fi
-    if [ ! "$(rpm -aq | grep centreon-bam-release)" ]; then
-        yum install -y http://yum.centreon.com/centreon-bam/d4e1d7d3e888f596674453d1f20ff6d3/19.04/el7/stable/noarch/RPMS/centreon-bam-release-19.04-1.el7.centos.noarch.rpm \
-        && yum-config-manager -y -q --disable centreon-bam-stable \
-        && yum-config-manager -y -q --enable centreon-bam-canary-noarch \
-        && yum install -y centreon-bam-server
-    fi
-    if [ ! "$(rpm -aq | grep centreon-mbi-release)" ]; then
-        yum install -y http://yum.centreon.com/centreon-mbi/5e0524c1c4773a938c44139ea9d8b4d7/19.04/el7/stable/noarch/RPMS/centreon-mbi-release-19.04-1.el7.centos.noarch.rpm \
-        && yum-config-manager -y -q --disable centreon-mbi-stable \
-        && yum-config-manager -y -q --enable centreon-mbi-canary-noarch \
-        && yum install -y centreon-bi-server
-    fi
-
     echo "Starting Apache to apply configuration ..."
     /opt/rh/httpd24/root/usr/sbin/httpd-scl-wrapper -DFOREGROUND &2> /dev/null
     PID_HTTPD=$!
     echo "Starting PHP-FPM to apply configuration ..."
-    /opt/rh/rh-php71/root/usr/sbin/php-fpm -F &2> /dev/null
+    /opt/rh/rh-php72/root/usr/sbin/php-fpm -F &2> /dev/null
     PID_PHPFPM=$!
 
     sleep 5 # waiting start httpd process
@@ -279,7 +237,7 @@ fi
 # SSH Configuration
 if [ ! -f "/var/spool/centreon/.ssh/known_hosts" ]; then
     touch /var/spool/centreon/.ssh/known_hosts
-fi 
+fi
 chmod -R 700 /var/spool/centreon/.ssh
 chown -R centreon:centreon /var/spool/centreon/.ssh
 if ! grep "StrictHostKeyChecking no" /etc/ssh/ssh_config; then

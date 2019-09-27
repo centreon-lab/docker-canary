@@ -2,7 +2,7 @@ FROM centos:7
 
 LABEL maintainer="Luiz Costa <me@luizgustavo.pro.br>"
 
-ENV CENTREON_REPO_VERSION centreon-release-19.04-1.el7.centos.noarch.rpm
+ENV CENTREON_REPO_VERSION centreon-release-19.10-1.el7.centos.noarch.rpm
 ENV TIMEZONE "Europe/Paris"
 
 RUN yum install -y \
@@ -16,7 +16,7 @@ RUN yum install -y \
     git \
     unzip \
     cronie \
-  && wget http://yum.centreon.com/standard/19.04/el7/stable/noarch/RPMS/${CENTREON_REPO_VERSION} -O /tmp/${CENTREON_REPO_VERSION} \
+  && wget http://yum.centreon.com/standard/19.10/el7/stable/noarch/RPMS/${CENTREON_REPO_VERSION} -O /tmp/${CENTREON_REPO_VERSION} \
   && yum install --nogpgcheck -y /tmp/${CENTREON_REPO_VERSION} \
   && yum-config-manager -q --enable centreon-canary \
   && yum-config-manager -q --enable centreon-canary-noarch \
