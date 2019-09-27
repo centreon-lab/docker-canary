@@ -29,7 +29,7 @@ RUN yum install -y \
   && mkdir /etc/supervisor.d \
   && echo '[include]' >> /etc/supervisord.conf \
   && echo 'files = /etc/supervisor.d/*.ini' >> /etc/supervisord.conf \
-  && echo "date.timezone = ${TIMEZONE}" > /etc/opt/rh/rh-php71/php.d/php-timezone.ini
+  && echo "date.timezone = ${TIMEZONE}" > /etc/opt/rh/rh-php72/php.d/php-timezone.ini
 
 # Add postfix-wrapper
 # From: https://www.snip2code.com/Snippet/309436/postfix-wrapper-sh-for-supervisord-in-do
